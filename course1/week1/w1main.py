@@ -59,10 +59,19 @@ def in_degree(graph):
 
 def topological_ordering(graph):
     deg = in_degree(graph)
+    n = len(deg.items())
     ordering = []
 
+    x = 0
     while deg:
-        for k, v in deg.copy().items():
+        a = deg.copy().items()
+        i = len(a)
+        
+        x += 1
+        if x % 10 == 0:
+            print(f"{n-i} of {n}")
+        
+        for k, v in a:
             if v == 0:
                 del deg[k]
                 ordering.append(k)
@@ -118,7 +127,7 @@ def longest_path(graph):
 
     return path[::-1], weight[end]
 
-def LCS_graph(v, w):
+def LCS_graph(v, w, indel=0, mismatch=0, match=1):
     m = len(v)
     n = len(w)
 
@@ -126,20 +135,20 @@ def LCS_graph(v, w):
 
     for i in range(m):
         for j in range(n):
-            graph[(i, j)][(i, j+1)] = 0
-            graph[(i, j)][(i+1, j)] = 0
-            graph[(i, j)][(i+1, j+1)] = 1 if v[i] == w[j] else 0
+            graph[(i, j)][(i, j+1)] = -indel 
+            graph[(i, j)][(i+1, j)] = -indel
+            graph[(i, j)][(i+1, j+1)] = match if v[i] == w[j] else -mismatch
 
     for i in range(m):
-        graph[(i, n)][(i+1, n)] = 0
+        graph[(i, n)][(i+1, n)] = -indel
 
     for j in range(n):
-        graph[(m, j)][(m, j+1)] = 0
+        graph[(m, j)][(m, j+1)] = -indel
 
     return graph
 
-def alignment(v, w):
-    path, weight = longest_path(LCS_graph(v, w))
+def alignment(v, w, indel=0, mismatch=0, match=1):
+    path, weight = longest_path(LCS_graph(v, w, match=match, mismatch=mismatch, indel=indel))
 
     start = path[0]
     cur_node = start
@@ -164,7 +173,7 @@ def alignment(v, w):
 
         cur_node = tail
 
-    return "".join(v_res), "".join(w_res), "".join(common)
+    return "".join(v_res), "".join(w_res), "".join(common), weight
 
 
 
@@ -215,26 +224,34 @@ if __name__ == "__main__":
     #     # a = "ATG"
     #     print(*alignment(a, b), sep="\n")
 
-    a = "GCGATC"
-    b =  "CTGACG"
-    print(*alignment(a, b), sep="\n")
+    #a = "GCGATC"
+    #b =  "CTGACG"
+    #print(*alignment(a, b), sep="\n")
 
-    x = [0, 0, 1, 1]
+    #x = [0, 0, 1, 1]
 
-    i = 3
-    while i < 24:
-        i += 1
-        x.append(x[i-2] + x[i-3])
+    #i = 3
+    #while i < 24:
+    #    i += 1
+    #    x.append(x[i-2] + x[i-3])
 
-    print(x)
+    #print(x)
 
-    graph = {
-        "a": {"b": 5, "c": 6, "d": 5},
-        "b": {"c": 2, "f": 9},
-        "c": {"e": 4, "f": 3, "g": 7},
-        "d": {"e": 4, "f": 5},
-        "e": {"g": 2},
-        "f": {"g": 1}
-    }
+    #graph = {
+    #    "a": {"b": 5, "c": 6, "d": 5},
+    #    "b": {"c": 2, "f": 9},
+    #    "c": {"e": 4, "f": 3, "g": 7},
+    #    "d": {"e": 4, "f": 5},
+    #    "e": {"g": 2},
+    #    "f": {"g": 1}
+    #}
 
-    print(longest_path(graph))
+    with open("datasets/dataset_247_3.txt") as file:
+        match, mismatch, indel = list(map(int, file.readline().strip().split(" ")))
+        a = file.readline().strip()
+        b = file.readline().strip()
+        
+        # match, mismatch, indel = 1, 1, 2
+        # a = "GAGA"
+        # b = "GAT"
+        print(*alignment(a, b, match=match, indel=indel, mismatch=mismatch), sep="\n")

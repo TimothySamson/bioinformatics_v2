@@ -1,0 +1,2 @@
+language = "python3"
+run = "cd course1/week1; python w1main.py"
