@@ -127,7 +127,7 @@ def longest_path(graph):
 
     return path[::-1], weight[end]
 
-def LCS_graph(v, w, indel=0, mismatch=0, match=1):
+def LCS_graph(v, w, indel=0, mismatch=0, match=1, local=False):
     m = len(v)
     n = len(w)
 
@@ -145,10 +145,21 @@ def LCS_graph(v, w, indel=0, mismatch=0, match=1):
     for j in range(n):
         graph[(m, j)][(m, j+1)] = -indel
 
+    if local:
+        for coord in graph.keys():
+            graph[(0, 0)][coord] = 0
+            graph[coord][(n, m)] = 0
+
     return graph
 
-def alignment(v, w, indel=0, mismatch=0, match=1):
-    path, weight = longest_path(LCS_graph(v, w, match=match, mismatch=mismatch, indel=indel))
+def alignment(v, w, indel=0, mismatch=0, match=1, local=False):
+    m = len(v)
+    n = len(w)
+    graph = LCS_graph(v, w, match=match, mismatch=mismatch, indel=indel, local=local)
+    if local:
+        for coord in graph.keys():
+            del graph[(0, 0)][coord]
+    path, weight = longest_path(graph)
 
     start = path[0]
     cur_node = start
@@ -175,7 +186,18 @@ def alignment(v, w, indel=0, mismatch=0, match=1):
 
     return "".join(v_res), "".join(w_res), "".join(common), weight
 
+def PAM250_score():
+    with open("datasets/PAM250.txt") as file:
+        keys = file.readline().strip().split()
+        score = {key: {} for key in keys}
+        for line, key1 in zip(file.readlines(), keys):
+            line = list(map(int, line.strip().split()[1: ]))
+            score[key1] = {
+                key2: val 
+                for val, key2 in zip(line, keys)
+            }
 
+        return score
 
 if __name__ == "__main__":
     # with open("datasets/dataset_261_10.txt") as file:
@@ -246,12 +268,16 @@ if __name__ == "__main__":
     #    "f": {"g": 1}
     #}
 
-    with open("datasets/dataset_247_3.txt") as file:
-        match, mismatch, indel = list(map(int, file.readline().strip().split(" ")))
-        a = file.readline().strip()
-        b = file.readline().strip()
-        
-        # match, mismatch, indel = 1, 1, 2
-        # a = "GAGA"
-        # b = "GAT"
-        print(*alignment(a, b, match=match, indel=indel, mismatch=mismatch), sep="\n")
+    # with open("datasets/dataset_247_3.txt") as file:
+    #     match, mismatch, indel = list(map(int, file.readline().strip().split(" ")))
+    #     a = file.readline().strip()
+    #     b = file.readline().strip()
+    #     
+    #     # match, mismatch, indel = 1, 1, 2
+    #     # a = "GAGA"
+    #     # b = "GAT"
+    #     print(*alignment(a, b, match=match, indel=indel, mismatch=mismatch), sep="\n")
+    a = "MEANLY"
+    b = "PENALTY"
+
+    print(PAM250_score())
