@@ -1,5 +1,6 @@
 import exercises
 from itertools import product
+from pprint import pprint
 
 class Graph:
     def __init__(self, adjList):
@@ -93,10 +94,9 @@ def complement_graph(graph):
                 res[nbr].append(k)
     return res
 
-def longest_path(graph):
-    print("finding topological ordering")
-    top_ord = topological_ordering(graph)
-    print("end topological ordering")
+def longest_path(graph, top_ord=None):
+    if not top_ord:
+        top_ord = topological_ordering(graph)
     complement = complement_graph(graph)
 
     backtrack = {}
@@ -127,17 +127,27 @@ def longest_path(graph):
 
     return path[::-1], weight[end]
 
-def LCS_graph(v, w, indel=0, mismatch=0, match=1, local=False):
+
+def LCS_graph(v, w, indel=0, mismatch=0, match=1, local=False, score=None):
     m = len(v)
     n = len(w)
 
     graph = {k: {} for k in product(range(m+1), range(n+1))}
 
+    if local:
+        for coord in graph.keys():
+            if coord != (0, 0) and coord != (m, n):
+                graph[(0, 0)][coord] = 0
+                graph[coord][(m, n)] = 0
+
     for i in range(m):
         for j in range(n):
             graph[(i, j)][(i, j+1)] = -indel 
             graph[(i, j)][(i+1, j)] = -indel
-            graph[(i, j)][(i+1, j+1)] = match if v[i] == w[j] else -mismatch
+            if not score:
+                graph[(i, j)][(i+1, j+1)] = match if v[i] == w[j] else -mismatch
+            else:
+                graph[(i, j)][(i+1, j+1)] = score[v[i]][w[j]]
 
     for i in range(m):
         graph[(i, n)][(i+1, n)] = -indel
@@ -145,59 +155,90 @@ def LCS_graph(v, w, indel=0, mismatch=0, match=1, local=False):
     for j in range(n):
         graph[(m, j)][(m, j+1)] = -indel
 
-    if local:
-        for coord in graph.keys():
-            graph[(0, 0)][coord] = 0
-            graph[coord][(n, m)] = 0
+
 
     return graph
 
-def alignment(v, w, indel=0, mismatch=0, match=1, local=False):
+
+def alignment(v, w, indel=0, mismatch=0, match=1, local=False, score=None):
     m = len(v)
     n = len(w)
-    graph = LCS_graph(v, w, match=match, mismatch=mismatch, indel=indel, local=local)
-    if local:
-        for coord in graph.keys():
-            del graph[(0, 0)][coord]
-    path, weight = longest_path(graph)
+    top_ordering = [(i, j) for i in range(m+1) for j in range(n+1)]
+    graph = LCS_graph(v, w, match=match, mismatch=mismatch, indel=indel, local=local, score=score)
+    path, weight = longest_path(graph, top_ord=top_ordering)
 
     start = path[0]
-    cur_node = start
+    tail = start
     v_res = []
     w_res = []
     common = []
-    for tail in path[1:]:
-        i, j = cur_node
-        x = tail[0] - cur_node[0]
-        y = tail[1] - cur_node[1]
+    for head in path[1:]:
+        i, j = tail
+        x = head[0] - tail[0]
+        y = head[1] - tail[1]
+
+        # GENERAL CASES
         if (x, y) == (1, 1):
             v_res.append(v[i])
             w_res.append(w[j])
             if v[i] == w[j]:
                 common.append(v[i])
-        if (x, y) == (0, 1):
+        elif (x, y) == (0, 1):
             v_res.append("-")
             w_res.append(w[j])
-        if (x, y) == (1, 0):
+        elif (x, y) == (1, 0):
             v_res.append(v[i])
             w_res.append("-")
 
-        cur_node = tail
+        # SPECIAL CASES
+        if tail in [(1, 0), (0, 1), (1, 1), (m, n)] and local:
+            cur_v = v_res[-1]
+            cur_w = w_res[-1]
+
+            if cur_v == "-" or cur_w == "-":
+                del v_res[-1]
+                del w_res[-1]
+            elif score[cur_v][cur_w] < 0:
+                del v_res[-1]
+                del w_res[-1]
+                weight -= score[cur_v][cur_w]
+
+        tail = head
 
     return "".join(v_res), "".join(w_res), "".join(common), weight
 
-def PAM250_score():
+def scoring_table(filename):
     with open("datasets/PAM250.txt") as file:
         keys = file.readline().strip().split()
         score = {key: {} for key in keys}
         for line, key1 in zip(file.readlines(), keys):
-            line = list(map(int, line.strip().split()[1: ]))
+            line = list(map(int, line.strip().split()[1:]))
             score[key1] = {
-                key2: val 
+                key2: val
                 for val, key2 in zip(line, keys)
             }
 
-        return score
+    return score
+
+def PAM250_score():
+    return scoring_table("datasets/PAM250.txt")
+
+def hamming_distance(p, q):
+    if len(p) != len(q):
+        raise ValueError("length of p equals length of q")
+
+    count = 0
+    n = len(p)
+    for i in range(0, n):
+        if p[i] != q[i]:
+            count += 1
+
+    return count
+
+
+def edit_distance(v, w):
+    _, _, _, score = alignment(v, w, indel=1, mismatch=1, match=0)
+    return -score
 
 if __name__ == "__main__":
     # with open("datasets/dataset_261_10.txt") as file:
@@ -268,16 +309,17 @@ if __name__ == "__main__":
     #    "f": {"g": 1}
     #}
 
-    # with open("datasets/dataset_247_3.txt") as file:
-    #     match, mismatch, indel = list(map(int, file.readline().strip().split(" ")))
+    # with open("datasets/dataset_247_10.txt") as file:
     #     a = file.readline().strip()
     #     b = file.readline().strip()
-    #     
-    #     # match, mismatch, indel = 1, 1, 2
-    #     # a = "GAGA"
-    #     # b = "GAT"
-    #     print(*alignment(a, b, match=match, indel=indel, mismatch=mismatch), sep="\n")
-    a = "MEANLY"
-    b = "PENALTY"
+    #
+    #     print(*alignment(a, b, indel=5, local=True, score=PAM250_score()), sep="\n")
+    # a = "MEANLY"
+    # b = "PENALTY"
+    # print(*alignment(a, b, indel=5, local=True, score=PAM250_score()), sep="\n")
 
-    print(PAM250_score())
+    with open("datasets/dataset_248_3.txt") as file:
+        v = file.readline().strip()
+        w = file.readline().strip()
+
+        print(edit_distance(v, w))
