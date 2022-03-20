@@ -1,4 +1,4 @@
-import exercises
+import week1_2.exercises
 from itertools import product
 from pprint import pprint
 
@@ -29,6 +29,7 @@ def manhattan_tourist_graph(down, right):
 
     return graph
 
+
 def manhattan_tourist(grid, n, m):
     node_weight = {(0, 0): 0}
     for j in range(1, m+1):
@@ -46,6 +47,7 @@ def manhattan_tourist(grid, n, m):
 
     return node_weight[(n, m)]
 
+
 def in_degree(graph):
     deg = {k: 0 for k in graph.keys()}
     for v in graph.values():
@@ -57,6 +59,7 @@ def in_degree(graph):
                 deg[node] += 1
 
     return deg
+
 
 def topological_ordering(graph):
     deg = in_degree(graph)
@@ -83,6 +86,7 @@ def topological_ordering(graph):
 
     return ordering
 
+
 def complement_graph(graph):
     res = {}
     for k, v in graph.items():
@@ -93,6 +97,7 @@ def complement_graph(graph):
             else:
                 res[nbr].append(k)
     return res
+
 
 def longest_path(graph, top_ord=None):
     if not top_ord:
@@ -112,7 +117,6 @@ def longest_path(graph, top_ord=None):
 
         backtrack[node] = backnode
         weight[node] = backnodes_weight[backnode]
-
 
     # backtrack path
     start = top_ord[0]
@@ -155,9 +159,68 @@ def LCS_graph(v, w, indel=0, mismatch=0, match=1, local=False, score=None):
     for j in range(n):
         graph[(m, j)][(m, j+1)] = -indel
 
-
-
     return graph
+
+
+# WEEK 2
+def fitting_alignment(long, short, indel, mismatch, match, score=None):
+    m = len(long)
+    n = len(short)
+    orig = LCS_graph(long, short, indel, mismatch, match, score=score)
+
+
+    for i in range(m):
+        orig[(0, 0)][(i, 0)] = 0
+        orig[(i, n)][(m, n)] = 0
+
+    top_ordering = [(i, j) for i in range(m+1) for j in range(n+1)]
+    path, weight = longest_path(orig, top_ord=top_ordering)
+    return *path_to_alignment(long, short, path), weight
+
+
+# WEEK 2
+def overlap_alignment(v, w, match=1, mismatch=1, indel=2):
+    m = len(v)
+    n = len(w)
+    orig = LCS_graph(v, w, indel=indel, match=match, mismatch=mismatch)
+
+    for i in range(m):
+        orig[(i, 0)][(i+1, 0)] = 0
+
+    for j in range(n):
+        orig[(m, j)][(m, j+1)] = 0
+
+    top_ordering = [(i, j) for i in range(m+1) for j in range(n+1)]
+    path, weight = longest_path(orig, top_ord=top_ordering)
+    return *path_to_alignment(v, w, path), weight
+
+
+def path_to_alignment(v, w, path):
+    tail = path[0]
+    v_res = []
+    w_res = []
+    common = []
+    for head in path[1:]:
+        i, j = tail
+        x = head[0] - tail[0]
+        y = head[1] - tail[1]
+
+        # GENERAL CASES
+        if (x, y) == (1, 1):
+            v_res.append(v[i])
+            w_res.append(w[j])
+            if v[i] == w[j]:
+                common.append(v[i])
+        elif (x, y) == (0, 1):
+            v_res.append("-")
+            w_res.append(w[j])
+        elif (x, y) == (1, 0):
+            v_res.append(v[i])
+            w_res.append("-")
+
+        tail = head
+
+    return "".join(v_res), "".join(w_res), "".join(common)
 
 
 def alignment(v, w, indel=0, mismatch=0, match=1, local=False, score=None):
@@ -167,6 +230,7 @@ def alignment(v, w, indel=0, mismatch=0, match=1, local=False, score=None):
     graph = LCS_graph(v, w, match=match, mismatch=mismatch, indel=indel, local=local, score=score)
     path, weight = longest_path(graph, top_ord=top_ordering)
 
+    # PATH TO ALIGNMENT
     start = path[0]
     tail = start
     v_res = []
@@ -208,7 +272,7 @@ def alignment(v, w, indel=0, mismatch=0, match=1, local=False, score=None):
     return "".join(v_res), "".join(w_res), "".join(common), weight
 
 def scoring_table(filename):
-    with open("datasets/PAM250.txt") as file:
+    with open(filename) as file:
         keys = file.readline().strip().split()
         score = {key: {} for key in keys}
         for line, key1 in zip(file.readlines(), keys):
@@ -318,8 +382,26 @@ if __name__ == "__main__":
     # b = "PENALTY"
     # print(*alignment(a, b, indel=5, local=True, score=PAM250_score()), sep="\n")
 
-    with open("datasets/dataset_248_3.txt") as file:
-        v = file.readline().strip()
-        w = file.readline().strip()
+    # with open("datasets/dataset_248_3.txt") as file:
+    #     v = file.readline().strip()
+    #     w = file.readline().strip()
+    #
+    #     print(edit_distance(v, w))
 
-        print(edit_distance(v, w))
+    # with open("datasets/dataset_248_5.txt") as file:
+    #     long = file.readline().strip()
+    #     short = file.readline().strip()
+    #     print(*fitting_alignment(long, short), sep="\n")
+
+
+
+    # with open("datasets/dataset_248_7.txt") as file:
+    #     v = file.readline().strip()
+    #     w = file.readline().strip()
+    #     print(*overlap_alignment(v, w), sep="\n")
+
+    v = "ACGACCACAGATACCGCTATTCACTATATCGTT"
+    w = "GATACACT"
+    print(*fitting_alignment(v, w, 1, 1, 1), sep="\n")
+
+
