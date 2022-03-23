@@ -13,8 +13,10 @@ def last_column(v, w, match, mismatch, indel, top, bottom, left, right, reverse=
 
     for col_num, j in enumerate(col_range, 1):
         next = [indel * col_num]
+
+        #TODO: Just need to work on the backtrack pointers
         if reverse and col_num == n:
-            backtrack = {(bottom, j+1): (bottom, j)}
+            backtrack = {(bottom, j-1): (bottom, j)}
         for row_num, i in enumerate(row_range, 1):
             diag_edge = prev[row_num-1] + (match if v[i-1] == w[j-1] else mismatch)
             right_edge = prev[row_num] + indel
@@ -24,15 +26,13 @@ def last_column(v, w, match, mismatch, indel, top, bottom, left, right, reverse=
             if reverse and col_num == n:
                 max_node = max(diag_edge, right_edge, down_edge)
                 if max_node == diag_edge:
-                    backtrack[(i, j)] = (i-1, j-1)
+                    backtrack[(i-1, j-1)] = (i, j)
                 elif max_node == right_edge:
-                    backtrack[(i, j)] = (i, j - 1)
+                    backtrack[(i, j-1)] = (i, j)
                 elif max_node == down_edge:
-                    backtrack[(i, j)] = (i-1, j)
+                    backtrack[(i-1, j)] = (i, j)
 
             next.append(max(diag_edge, right_edge, down_edge))
-
-        print(next)
 
         prev = next
 
@@ -42,6 +42,7 @@ def middle_edge(v, w, match, mismatch, indel, top, bottom, left, right):
     middle = (left + right) // 2
 
     left_column, _ = last_column(v, w, match, mismatch, indel, top, bottom, left, middle)
+    right_column, backtrack = last_column(v, w, match, mismatch, indel, top, bottom, middle, right)
 
 
 
