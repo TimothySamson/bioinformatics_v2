@@ -19,11 +19,11 @@ if __name__ == "__main__":
     # print(*affine_alignment(v, w, 1, 5, 3, 1), sep="\n")
     # print(*alignment("A", "B", indel=1, mismatch=3), sep="\n")
 
-    with open("week3/datasets/dataset_250_12.txt") as file:
-        w = file.readline().strip()
-        v = file.readline().strip()
+   #  with open("week3/datasets/dataset_250_12.txt") as file:
+   #      w = file.readline().strip()
+   #      v = file.readline().strip()
 
-        print(middle_edge(v, w, 1, 1, 5, 0, len(v), 0, len(w)))
+   #      print(middle_edge(v, w, 1, 1, 5, 0, len(v), 0, len(w)))
 
     # w = "TTTT"
     # v = "CC"
@@ -33,7 +33,9 @@ if __name__ == "__main__":
     # w = "GA"
     # print(last_column(v[::-1], w[::-1], 1, 1, 2))
 
-
+	v = "ATGC"
+	w = "G"
+	print(middle_edge(v, w, 1, 1, 1, 0, len(v), 0, len(w)))
 
 
 
