@@ -42,7 +42,7 @@ def middle_edge(v, w, match, mismatch, indel, top, bottom, left, right):
         middle_col, backtrack = last_column(v, w, match, mismatch, indel)
         max_ind = np.argmax(middle_col)
         max_node = (top + max_ind, 1)
-    
+
         i, j = max_node
         if backtrack[max_ind] == "diag":
             nbr = (i-1, j-1)
@@ -51,8 +51,9 @@ def middle_edge(v, w, match, mismatch, indel, top, bottom, left, right):
         elif backtrack[max_ind] == "down":
             nbr = (i-1, j)
 
+        print("Hello")
         return {nbr: max_node}
-        
+
     middle = (left + right) // 2
 
     left_column, _ = last_column(v[top:bottom], w[:middle], match, mismatch, indel)
@@ -79,15 +80,10 @@ def middle_edge(v, w, match, mismatch, indel, top, bottom, left, right):
     return {max_node: nbr}
 
 def linear_space_alignment(v, w, match, mismatch, indel, top=0, bottom=None, left=0, right=None):
-	if bottom == None:
-		bottom = len(v)
-	if right == None:
-		right = len(w)
-
-	
-
-	
-	
+    if bottom == None:
+        bottom = len(v)
+    if right == None:
+        right = len(w)
 
 
 
