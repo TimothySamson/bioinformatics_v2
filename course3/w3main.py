@@ -19,26 +19,32 @@ if __name__ == "__main__":
     # print(*affine_alignment(v, w, 1, 5, 3, 1), sep="\n")
     # print(*alignment("A", "B", indel=1, mismatch=3), sep="\n")
 
-    #  with open("week3/datasets/dataset_250_12.txt") as file:
-    #      w = file.readline().strip()
-    #      v = file.readline().strip()
+    # with open("week3/datasets/dataset_250_12.txt") as file:
+    #     w = file.readline().strip()
+    #     v = file.readline().strip()
+    #
+    #     print(middle_edge(v, w, 1, 1, 5, 0, len(v), 0, len(w)))
 
-    #      print(middle_edge(v, w, 1, 1, 5, 0, len(v), 0, len(w)))
-
-    # w = "TTTT"
-    # v = "CC"
-    # print(middle_edge(v, w, 1, 5, 1, 0, len(v), 0, len(w)))
+    # w = "ACAGT"
+    # v = "CAT"
+    # print(*middle_edge(v, w, 2, 3, 1, 0, len(v), 0, len(w)), sep="\n")
 
     # v = "GAT"
     # w = "GA"
     # print(last_column(v[::-1], w[::-1], 1, 1, 2))
 
+    # w = "GAACCC"
     # v = "G"
-    # w = "T"
-    # print(middle_edge(v, w, 1, 2, 0, 0, len(v), 0, len(w)))
+    # print(middle_edge(v, w, 1, 5, 1, 0, len(v), 0, len(w)))
 
-    v = "GAGA"
-    w = "GAT"
-    path = linear_space_alignment_path(v, w, 1, 1, 2)
+    # v = "TT"
+    # w = "CC"
+    # path = linear_space_alignment_path(v, w, 1, 1, 5)
+    # print(path)
+    # print(*path_to_alignment(v, w, path), sep="\n ")
+
+    v = "ACAGCTA"
+    w = "G"
+    path = linear_space_alignment_path(v, w, 1, 1, 0)
     print(path)
-    print(path_to_alignment(v, w, path))
+    print(*path_to_alignment(v, w, path), sep="\n")

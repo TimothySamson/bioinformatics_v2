@@ -39,7 +39,7 @@ def last_column(v, w, match, mismatch, indel):
 
 def middle_edge(v, w, match, mismatch, indel, top, bottom, left, right):
     if right - left == 1:
-        middle_col, backtrack = last_column(v, w, match, mismatch, indel)
+        middle_col, backtrack = last_column(v[top:bottom], w[left:right], match, mismatch, indel)
         max_ind = np.argmax(middle_col)
         max_node = (top + max_ind, right)
 
@@ -96,21 +96,18 @@ def linear_space_alignment_path(v, w, match, mismatch, indel, top=0, bottom=None
         return [(b, j) for j in range(left, right+1)]
 
     mid_edge = middle_edge(v, w, match, mismatch, indel, top, bottom, left, right)
+    print(mid_edge)
     a, b = mid_edge[0]
     c, d = mid_edge[1]
 
-    print(f"mid_edge: {mid_edge}")
 
-
-    print("going into left path:")
     left_path = linear_space_alignment_path(v, w, match, mismatch, indel, top, a, left, b)
     print(f"left path: {left_path}")
 
 
-    print("going into right path:")
     right_path = linear_space_alignment_path(v, w, match, mismatch, indel, c, bottom, d, right)
     print(f"right path: {right_path}")
-    return left_path[:-1] + mid_edge + right_path[1:]
+    return left_path + right_path
 
 
 
