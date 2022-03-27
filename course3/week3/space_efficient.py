@@ -51,7 +51,7 @@ def middle_edge(v, w, match, mismatch, indel, top, bottom, left, right):
         elif backtrack[max_ind] == "down":
             nbr = (i-1, j)
 
-        print("Hello")
+        print("Hello world")
         return {nbr: max_node}
 
     middle = (left + right) // 2
