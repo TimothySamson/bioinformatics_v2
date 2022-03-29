@@ -33,8 +33,8 @@ if __name__ == "__main__":
     # w = "GA"
     # print(last_column(v[::-1], w[::-1], 1, 1, 2))
 
-    # w = "GAACCC"
-    # v = "G"
+    # w = "GG"
+    # v = "GAAAG"
     # print(middle_edge(v, w, 1, 5, 1, 0, len(v), 0, len(w)))
 
     # v = "TT"
@@ -43,8 +43,8 @@ if __name__ == "__main__":
     # print(path)
     # print(*path_to_alignment(v, w, path), sep="\n ")
 
-    v = "ACAGCTA"
-    w = "G"
-    path = linear_space_alignment_path(v, w, 1, 1, 0)
+    v = "GAAAG"
+    w = "GG"
+    path = linear_space_alignment_path(v, w, 1, 5, 1)
     print(path)
     print(*path_to_alignment(v, w, path), sep="\n")
