@@ -33,17 +33,31 @@ class Permutation:
 def GreedyReversal(list):
     permutation = Permutation(list)
     for i in range(len(list)):
+        if permutation[i] == i+1:
+            continue
         permutation.reverse_to_front(i+1)
-        print(permutation)
+        yield str(permutation)
         if permutation.list[i] < 0:
             permutation.list[i] *= -1
-            print(permutation)
+            yield str(permutation)
 
 
-with open("dataset_287_6.txt") as file:
-    numlist = [int(x) for x in file.readline().strip().split(" ")]
-    a = Permutation(numlist)
+# with open("dataset_286_4 (1).txt") as file, open("GreedySorting.txt") as ans, open("output.txt", "w") as scratch:
+#     numlist = [int(x) for x in file.readline().strip().split(" ")]
+#     for output, answer in zip(GreedyReversal(numlist), ans.readlines()):
+#         answer = answer.strip()
+#         print(output, file=scratch)
 
+# with open("dataset_286_4.txt") as file, open("output.txt", "w") as output:
+#     numlist = [int(x) for x in file.readline().strip().split(" ")]
+#     a = Permutation(numlist)
+#
+#     for line in GreedyReversal(numlist):
+#         print(line, file=output)
 
-    print(len(list(a.breakpoints())))
+a = [int(x) for x in "+2 +6 -8 -17 +7 -14 +18 +3 -5 -16 -11 -19 -4 +10 +13 -20 -1 +9 -12 +15".split()]
+for i, line in enumerate(GreedyReversal(a)):
+    print(i, line)
 
+b = [int(x) for x in "+6 -12 -9 +17 +18 -4 +5 -3 +11 +19 +20 +10 +8 +15 -14 -13 +2 +7 -16 -1".split()]
+print(len(list(Permutation(b).breakpoints())))
