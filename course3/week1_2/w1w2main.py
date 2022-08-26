@@ -271,6 +271,7 @@ def alignment(v, w, indel=0, mismatch=0, match=1, local=False, score=None):
 
     return "".join(v_res), "".join(w_res), "".join(common), weight
 
+
 def scoring_table(filename):
     with open(filename) as file:
         keys = file.readline().strip().split()

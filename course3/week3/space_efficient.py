@@ -1,4 +1,5 @@
 import numpy as np
+from week1_2.w1w2main import alignment
 
 def last_column(v, w, match, mismatch, indel):
     mismatch = -mismatch
@@ -40,25 +41,28 @@ def last_column(v, w, match, mismatch, indel):
 def middle_edge(v, w, match, mismatch, indel, top, bottom, left, right):
     if right - left == 1:
         middle_col, backtrack = last_column(v[top:bottom], w[left:right], match, mismatch, indel)
-        max_ind = np.argmax(middle_col)
-        max_node = (top + max_ind, right)
+        # max_ind = np.argmax(middle_col)
+        # max_node = (top + max_ind, right)
+
+        m = len(backtrack)
+
+        for k in range(m-1, -1, -1):
+            if backtrack[k] == "diag" or backtrack[k] == "right":
+                max_node = (top + k, right)
+                break
 
         i, j = max_node
-        if backtrack[max_ind] == "diag":
+        if backtrack[k] == "diag":
             nbr = (i-1, j-1)
-        elif backtrack[max_ind] == "right":
+        elif backtrack[k] == "right":
             nbr = (i, j-1)
 
-        # this is impossible to get to (?)
-        elif backtrack[max_ind] == "down":
-            nbr = (i-1, j)
-
-        return [nbr, max_node]
+        return [nbr, max_node], middle_col[-1]
 
     middle = (left + right) // 2
 
-    left_column, _ = last_column(v[top:bottom], w[:middle], match, mismatch, indel)
-    right_column, backtrack = last_column(v[top:bottom][::-1], w[middle:][::-1], match, mismatch, indel)
+    left_column, _ = last_column(v[top:bottom], w[left:middle], match, mismatch, indel)
+    right_column, backtrack = last_column(v[top:bottom][::-1], w[middle:right][::-1], match, mismatch, indel)
     right_column = right_column[::-1]
     backtrack = backtrack[::-1]
 
@@ -75,15 +79,15 @@ def middle_edge(v, w, match, mismatch, indel, top, bottom, left, right):
     elif backtrack[max_ind] == "down":
         nbr = (i+1, j)
 
-    return [max_node, nbr]
+    return [max_node, nbr], middle_col[max_ind]
 
-depth = 0
 def linear_space_alignment_path(v, w, match, mismatch, indel, top=0, bottom=None, left=0, right=None, depth=0):
     if bottom == None:
         bottom = len(v)
     if right == None:
         right = len(w)
 
+    print("\t"*depth, top, bottom, left, right)
 
     # return a path from bottom to top
     if right == left:
@@ -95,10 +99,10 @@ def linear_space_alignment_path(v, w, match, mismatch, indel, top=0, bottom=None
         b = bottom
         return [(b, j) for j in range(left, right+1)]
 
-    mid_edge = middle_edge(v, w, match, mismatch, indel, top, bottom, left, right)
+    mid_edge, score = middle_edge(v, w, match, mismatch, indel, top, bottom, left, right)
     a, b = mid_edge[0]
     c, d = mid_edge[1]
-    print("\t"*depth, top, bottom, left, right)
+
     print("\t"*depth + f"middle edge: {mid_edge}")
 
 
@@ -108,7 +112,11 @@ def linear_space_alignment_path(v, w, match, mismatch, indel, top=0, bottom=None
 
     right_path = linear_space_alignment_path(v, w, match, mismatch, indel, c, bottom, d, right, depth=depth+1)
     print("\t"*depth + f"right path: {right_path}")
-    return left_path + right_path
+
+    if depth == 0:
+        return left_path + right_path, score
+    else:
+        return left_path + right_path
 
 
 
